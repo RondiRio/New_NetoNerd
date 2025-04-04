@@ -1,0 +1,64 @@
+/* logo NetoNerd */
+
+.logo {
+  width: 100px;
+  height: 100px;
+  background-size: 100%;
+  margin: 0 auto;
+  border-radius: 50%;
+} 
+.nav_planos{
+  text-align: center;
+  padding: 80px 20px;
+  background: linear-gradient(135deg, #007bff, #00c3ff);
+  color: white;
+}
+
+.LinksNav {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  color: white;
+  padding: 10px;
+}
+.LinksNav a {
+  text-decoration: none;
+  color: black;
+  background-color: white;
+  margin-left: 15px;
+  border-radius: 8%;
+}
+
+/* API */
+#place-picker-box {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#place-picker-container {
+  text-align: left;
+}
+
+.navbar-toggler {
+  border: none;
+  outline: none;
+}
+
+.navbar-toggler-icon {
+  background-image: url('https://upload.wikimedia.org/wikipedia/commons/b/b2/Hamburger_icon.svg');
+  width: 30px;
+  height: 30px;
+}
+
+@media (max-width: 992px) {
+  .navbar-nav {
+    text-align: center;
+  }
+  .navbar-nav .nav-item {
+    margin: 10px 0;
+  }
+}
+.alinhamentoFooter {
+  border: solid 1px red;
+}
