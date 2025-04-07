@@ -1,13 +1,9 @@
 <?php
-session_start();
+// session_start();
 require 'bandoDeDados/conexao.php';
+require_once "validador_acesso.php";
 
 $conn = getConnection();
-
-// Verifica se o usuário está autenticado
-if (!isset($_SESSION['id'])) {
-    die("Usuário não autenticado.");
-}
 
 // Verifica se o ID do chamado foi enviado via GET
 if (!isset($_GET['id']) || empty($_GET['id'])) {
@@ -17,7 +13,7 @@ if (!isset($_GET['id']) || empty($_GET['id'])) {
 $chamado_id = $_GET['id'];
 $usuario_id = $_SESSION['id'];
 
-// Busca os dados do chamado para preencher o formulário
+// Busca os dados do chamado
 $stmt = $conn->prepare("SELECT titulo, descricao, prioridade, status FROM chamados WHERE id = ? AND cliente_id = ?");
 $stmt->bind_param("ii", $chamado_id, $usuario_id);
 $stmt->execute();
@@ -35,40 +31,110 @@ $conn->close();
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Editar Chamado</title>
-    <link rel="stylesheet" href="estilos.css">
+    <meta charset="utf-8" />
+    <title>NetoNerd</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="css/main.css">
+    <style>
+        .card-abrir-chamado {
+            padding: 30px 0 0 0;
+            width: 100%;
+            margin: 0 auto;
+        }
+        .navbar-custom {
+            background-color: #007bff;
+        }
+        .card-header-custom {
+            background-color: #007bff;
+            color: white;
+        }
+        .card-body {
+            background-color: #f8f9fa;
+        }
+    </style>
 </head>
 <body>
-    <h2>Editar Chamado</h2>
-    <form action="salvar_edicao.php" method="POST">
-        <input type="hidden" name="id" value="<?= $chamado_id ?>">
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-custom bg-primary">
+        <a class="navbar-brand" href="index.php">
+            <img class="logo" src="imagens/logoNetoNerd.jpg" alt="Logo NetoNerd">
+        </a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse LinksNav" id="navbarNav">
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item"><a class="nav-link" href="atendimento.php">Atendimento</a></li>
+                <li class="nav-item"><a class="nav-link" href="planos.php">Planos</a></li>
+                <li class="nav-item"><a class="nav-link" href="contato.php">Contato</a></li>
+                <li class="nav-item"><a class="nav-link" href="quemsomo.php">Quem somos</a></li>
+                <li class="nav-item"><a class="nav-link btn btn-light text-white bg-dark ml-2" href="logoff.php">Sair</a></li>
+            </ul>
+        </div>
+    </nav>
 
-        <label for="titulo">Título:</label>
-        <input type="text" name="titulo" value="<?= htmlspecialchars($chamado['titulo']) ?>" required>
+    <div class="container mt-5">
+        <div class="row">
+            <div class="card-abrir-chamado">
+                <div class="card bg-dark">
+                    <div class="card-header-custom">
+                        EDITAR CHAMADO
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col">
+                                <form action="salvar_edicao.php" method="POST">
+                                    <input type="hidden" name="id" value="<?= $chamado_id ?>">
 
-        <label for="descricao">Descrição:</label>
-        <textarea name="descricao" required><?= htmlspecialchars($chamado['descricao']) ?></textarea>
+                                    <div class="form-group bg-light">
+                                        <label>Título</label>
+                                        <input type="text" name="titulo" class="form-control" value="<?= htmlspecialchars($chamado['titulo']) ?>" required>
+                                    </div>
 
-        <label for="prioridade">Prioridade:</label>
-        <select name="prioridade">
-            <option value="baixa" <?= $chamado['prioridade'] == 'baixa' ? 'selected' : '' ?>>Baixa</option>
-            <option value="media" <?= $chamado['prioridade'] == 'media' ? 'selected' : '' ?>>Média</option>
-            <option value="alta" <?= $chamado['prioridade'] == 'alta' ? 'selected' : '' ?>>Alta</option>
-            <option value="critica" <?= $chamado['prioridade'] == 'critica' ? 'selected' : '' ?>>Crítica</option>
-        </select>
+                                    <div class="form-group bg-light">
+                                        <label>Descrição</label>
+                                        <textarea name="descricao" class="form-control" rows="3" required><?= htmlspecialchars($chamado['descricao']) ?></textarea>
+                                    </div>
 
-        <label for="status">Status:</label>
-        <select name="status">
-            <option value="aberto" <?= $chamado['status'] == 'aberto' ? 'selected' : '' ?>>Aberto</option>
-            <option value="em andamento" <?= $chamado['status'] == 'em andamento' ? 'selected' : '' ?>>Em Andamento</option>
-            <option value="pendente" <?= $chamado['status'] == 'pendente' ? 'selected' : '' ?>>Pendente</option>
-            <option value="resolvido" <?= $chamado['status'] == 'resolvido' ? 'selected' : '' ?>>Resolvido</option>
-            <option value="cancelado" <?= $chamado['status'] == 'cancelado' ? 'selected' : '' ?>>Cancelado</option>
-        </select>
+                                    <div class="form-group bg-light">
+                                        <label>Prioridade</label>
+                                        <select name="prioridade" class="form-control">
+                                            <option value="baixa" <?= $chamado['prioridade'] == 'baixa' ? 'selected' : '' ?>>Baixa</option>
+                                            <!-- <option value="media" <?= $chamado['prioridade'] == 'media' ? 'selected' : '' ?>>Média</option> -->
+                                            <!-- <option value="alta" <?= $chamado['prioridade'] == 'alta' ? 'selected' : '' ?>>Alta</option> -->
+                                            <!-- <option value="critica" <?= $chamado['prioridade'] == 'critica' ? 'selected' : '' ?>>Crítica</option> -->
+                                        </select>
+                                    </div>
 
-        <button type="submit">Salvar Alterações</button>
-    </form>
+                                    <div class="form-group bg-light">
+                                        <label>Status</label>
+                                        <select name="status" class="form-control">
+                                            <option value="aberto" <?= $chamado['status'] == 'aberto' ? 'selected' : '' ?>>Aberto</option>
+                                            <!-- <option value="em andamento" <?= $chamado['status'] == 'em andamento' ? 'selected' : '' ?>>Em Andamento</option> -->
+                                            <!-- <option value="pendente" <?= $chamado['status'] == 'pendente' ? 'selected' : '' ?>>Pendente</option> -->
+                                            <!-- <option value="resolvido" <?= $chamado['status'] == 'resolvido' ? 'selected' : '' ?>>Resolvido</option> -->
+                                            <!-- <option value="cancelado" <?= $chamado['status'] == 'cancelado' ? 'selected' : '' ?>>Cancelado</option> -->
+                                        </select>
+                                    </div>
+
+                                    <div class="row mt-5">
+                                        <div class="col-6">
+                                            <a href="home.php" class="btn btn-lg btn-warning btn-block">Voltar</a>
+                                        </div>
+                                        <div class="col-6">
+                                            <button class="btn btn-lg btn-info btn-block" type="submit">Salvar</button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

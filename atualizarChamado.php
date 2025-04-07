@@ -1,55 +1,66 @@
 <?php
-// Conexão com o banco de dados
-$servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "seu_banco_de_dados";
+include_once("bandoDeDados/conexao.php");
+session_start(); // Certifique-se de ter iniciado a sessão
 
-$conn = new mysqli($servername, $username, $password, $dbname);
+$conn = new mysqli($host, $username, $password, $dbname);
 
 // Verifica a conexão
 if ($conn->connect_error) {
     die("Falha na conexão: " . $conn->connect_error);
 }
-
+$_SESSION['tipo_usuario'] = 'cliente';
 // Verifica se os dados foram enviados via POST
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $id = $_POST['id']; // ID do chamado a ser atualizado
-    $status = $_POST['status']; // Novo status do chamado
-    $descricao = $_POST['descricao']; // Nova descrição do chamado
+    echo "<pre>";
+    print_r($_SESSION); // Debug: imprime os dados recebidos');
+    echo "</pre>";
+    print_r($_POST); // Debug: imprime os dados recebidos
+    $id = $_POST['chamado_id'];
+    $user_type = $_SESSION['tipo_usuario']; // Assume que você tem o tipo de usuário na sessão
+    $error = false;
 
-    // Validação básica
-    if (!empty($id) && !empty($status) && !empty($descricao)) {
-        // Atualiza o chamado no banco de dados
-        $sql = "UPDATE chamados SET status = ?, descricao = ? WHERE id = ?";
-        $stmt = $conn->prepare($sql);
-        $stmt->bind_param("ssi", $status, $descricao, $id);
+    // Validação por tipo de usuário
+    if ($user_type === 'tecnico') {
+        // Técnico só pode atualizar status
+        if (isset($_POST['status']) && !empty($_POST['status'])) {
+            $status = $_POST['status'];
+            $sql = "UPDATE chamados SET status = ? WHERE id = ?";
+            $stmt = $conn->prepare($sql);
+            $stmt->bind_param("si", $status, $id);
+        } else {
+            $error = true;
+            echo "Técnico só pode atualizar o status do chamado.";
+        }
+    } 
+    elseif ($user_type === 'cliente') {
+        // Cliente só pode atualizar título e descrição
+        if (isset($_POST['titulo']) && isset($_POST['descricao']) && 
+            !empty($_POST['titulo']) && !empty($_POST['descricao'])) {
+            $titulo = $_POST['titulo'];
+            $descricao = $_POST['descricao'];
+            $sql = "UPDATE chamados SET titulo = ?, descricao = ? WHERE id = ?";
+            $stmt = $conn->prepare($sql);
+            $stmt->bind_param("ssi", $titulo, $descricao, $id);
+        } else {
+            $error = true;
+            echo "Cliente só pode atualizar título e descrição.";
+        }
+    } else {
+        $error = true;
+        echo "Tipo de usuário não autorizado.";
+    }
 
+    if (!$error) {
         if ($stmt->execute()) {
             echo "Chamado atualizado com sucesso!";
         } else {
             echo "Erro ao atualizar o chamado: " . $conn->error;
         }
-
         $stmt->close();
-    } else {
-        echo "Por favor, preencha todos os campos.";
     }
+
+    header("Location: painelTecnicoCliente.php?atualizado=sucesso"); // Redireciona para o painel após a atualização
 }
 
 $conn->close();
 ?>
-
-<!-- Formulário para atualizar o chamado -->
-<form method="POST" action="atualizarChamado.php">
-    <label for="id">ID do Chamado:</label>
-    <input type="text" name="id" id="id" required><br>
-
-    <label for="status">Status:</label>
-    <input type="text" name="status" id="status" required><br>
-
-    <label for="descricao">Descrição:</label>
-    <textarea name="descricao" id="descricao" required></textarea><br>
-
-    <button type="submit">Atualizar Chamado</button>
-</form>

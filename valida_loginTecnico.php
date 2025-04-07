@@ -9,18 +9,29 @@ try {
 } catch (PDOException $e) {
     die("Erro ao conectar ao banco de dados: " . $e->getMessage());
 }
-
 // Verifica se o formulário foi enviado
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $matricula = trim($_POST['matricula'] ?? ''); // Agora verifica pela matrícula
-    $senha = trim($_POST['senha'] ?? '');
-
+    $matricula = trim($_POST['matricula']);
+    $senha = trim($_POST['senha']);
+    
     if (!empty($matricula) && !empty($senha)) {
-        // Consulta o usuário no banco de dados pela matrícula
         $stmt = $pdo->prepare("SELECT matricula, senha_hash, status_tecnico, id, nome FROM tecnicos WHERE matricula = :matricula");
         $stmt->bindParam(':matricula', $matricula, PDO::PARAM_STR);
         $stmt->execute();
         $usuario = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        // Update the password hash if it's not hashed
+        if ($usuario && $usuario['senha_hash'] === $senha) {
+            $hash = password_hash($senha, PASSWORD_DEFAULT);
+            $updateStmt = $pdo->prepare("UPDATE tecnicos SET senha_hash = :hash WHERE matricula = :matricula");
+            $updateStmt->execute(['hash' => $hash, 'matricula' => $matricula]);
+            $usuario['senha_hash'] = $hash;
+        }
+
+        // Debug para verificar os valores
+        echo "Senha fornecida: " . $senha . "<br>";
+        echo "Hash no banco: " . $usuario['senha_hash'] . "<br>";
+        echo "Resultado verify: " . (password_verify($senha, $usuario['senha_hash']) ? 'true' : 'false') . "<br>";
 
         if ($usuario && password_verify($senha, $usuario['senha_hash'])) {
             if ($usuario['status_tecnico'] === 'Ativo') {
@@ -28,7 +39,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $_SESSION['usuario_nome'] = $usuario['nome'];
                 $_SESSION['usuario_matricula'] = $usuario['matricula'];
 
-                // Verifica se a matrícula contém "ADM" para redirecionamento
                 if (strpos($usuario['matricula'], 'ADM') !== false) {
                     header("Location: dashboard.php");
                 } else {
@@ -39,11 +49,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $erro = "Usuário inativo. Entre em contato com a gerência.";
             }
         } else {
-            print_r($_POST);
             $erro = "Matrícula ou senha inválidos.";
         }
     } else {
-        print_r($_POST);
         $erro = "Preencha todos os campos.";
     }
 }

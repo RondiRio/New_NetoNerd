@@ -181,7 +181,7 @@ if (!isset($_SESSION['nome']) && isset($_SESSION["id"])) {
                 <td><span class='badge bg-" . getBadgeClass($prioridade) . "'>$prioridade</span></td>
                 <td><span class='badge bg-" . getStatusClass($status) . "'>$status</span></td>
                 <td>
-                    <a href='painelTecnicoCliente.php?id=$id' class='btn btn-primary btn-sm'>Visualizar</a>
+                    
                     <a href='editar_chamado.php?id=$id' class='btn btn-warning btn-sm'>Editar</a>
                     <a href='excluir_chamado.php?id=$id' class='btn btn-danger btn-sm' onclick='return confirm(\"Tem certeza que deseja excluir este chamado?\")'>Excluir</a>
                 </td>
