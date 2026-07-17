@@ -6,8 +6,9 @@ $host = Config::get('APP_LEGACY_DB_HOST', 'localhost');
 $dbname = Config::get('APP_LEGACY_DB_NAME', 'netonerd_chamados');
 $username = Config::get('APP_LEGACY_DB_USERNAME', '');
 $password = Config::get('APP_LEGACY_DB_PASSWORD', '');
+$port = (int) Config::get('APP_LEGACY_DB_PORT', 3306);
 
-$conn = new mysqli($host, $username, $password, $dbname);
+$conn = new mysqli($host, $username, $password, $dbname, $port);
 
 if ($conn->connect_error) {
     die("Erro na conexão: " . $conn->connect_error);
