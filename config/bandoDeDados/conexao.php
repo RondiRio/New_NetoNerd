@@ -9,9 +9,8 @@ $host = $dbConfig['host'];
 $dbname = $dbConfig['name'];
 $username = $dbConfig['username'];
 $password = $dbConfig['password'];
-$port = (int) $dbConfig['port'];
 
-$conn = new mysqli($host, $username, $password, $dbname, $port);
+$conn = new mysqli($host, $username, $password, $dbname);
 
 if ($conn->connect_error) {
     die("Erro na conexão: " . $conn->connect_error);
