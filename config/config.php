@@ -41,8 +41,17 @@ class Config {
             $key = trim($key);
             $value = trim($value);
 
-            // Remover aspas do valor se existirem
-            $value = trim($value, '"\'');
+            // Remover aspas delimitadoras (envolvendo o valor inteiro), preservando
+            // aspas que façam parte do valor real (ex: senha terminando em ").
+            // trim($value, '"\'') apagaria essas aspas reais silenciosamente.
+            $len = strlen($value);
+            if ($len >= 2) {
+                $first = $value[0];
+                $last = $value[$len - 1];
+                if (($first === '"' && $last === '"') || ($first === "'" && $last === "'")) {
+                    $value = substr($value, 1, -1);
+                }
+            }
 
             // Converter valores booleanos
             if (strtolower($value) === 'true') {
