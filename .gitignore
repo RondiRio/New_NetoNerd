@@ -24,8 +24,9 @@ $BACKUP_DIR/
 
 # Logs
 *.log
-logs/
-storage/logs/
+/logs/
+storage/logs/*
+!storage/logs/.gitkeep
 
 # Cache
 storage/cache/

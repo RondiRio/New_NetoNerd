@@ -26,3 +26,8 @@ RewriteRule ^(\$BACKUP_DIR|backup_20251008_122106|unicle_execution|_REMOVER_DO_S
 # isso forca o php.ini a nivel de diretorio como rede de seguranca extra)
 php_flag display_errors off
 php_flag display_startup_errors off
+
+# Registrar erros em arquivo (nunca na tela) para diagnostico sem expor nada
+# publicamente — storage/logs/ ja e bloqueado para acesso HTTP acima.
+php_flag log_errors on
+php_value error_log storage/logs/php_errors.log
