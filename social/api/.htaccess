@@ -1,0 +1,13 @@
+RewriteEngine On
+RewriteBase /social/api/
+
+# Redireciona tudo para index.php, exceto arquivos/pastas que existem
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^ index.php [QSA,L]
+
+# Bloqueia acesso direto a arquivos sensíveis
+<FilesMatch "\.(env|log|sql|md)$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
